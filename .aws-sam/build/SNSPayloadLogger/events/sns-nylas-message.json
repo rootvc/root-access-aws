@@ -1,0 +1,21 @@
+{
+  "Type": "Notification",
+  "MessageId": "d6c79a65-d5b8-5371-9452-c04ce761a654",
+  "TopicArn": "arn:aws:sns:us-east-1:630351220487:nylas-streams",
+  "Message": "This is a notification from SNS",
+  "Timestamp": "2021-12-07T09:59:53.983Z",
+  "UnsubscribeURL": "https://sns.us-east-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:us-east-1:630351220487:nylas-streams:935cfc35-cf7a-4a74-a350-a3715d70f500",
+  "MessageAttributes": {
+    "specversion": {
+      "Type": "String",
+      "Value": "1.0"
+    },
+    "source": {
+      "Type": "String",
+      "Value": "/nylas/messages"
+    },
+    "type": {
+      "Type": "String",
+      "Value": "com.nylas.messages.create.inflated"
+    }
+  }

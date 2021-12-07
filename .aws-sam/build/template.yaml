@@ -1,0 +1,45 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: root-access-aws
+Transform:
+- AWS::Serverless-2016-10-31
+Resources:
+  SimpleTopic:
+    Type: AWS::SNS::Topic
+  SNSPayloadLogger:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: A Lambda function that logs the payload of messages sent to an
+        associated SNS topic.
+      Runtime: nodejs14.x
+      Architectures:
+      - x86_64
+      Handler: src/handlers/sns-payload-logger.snsPayloadLoggerHandler
+      Events:
+        SNSTopicEvent:
+          Type: SNS
+          Properties:
+            Topic:
+              Ref: SimpleTopic
+      MemorySize: 128
+      Timeout: 100
+      Policies:
+      - AWSLambdaBasicExecutionRole
+      CodeUri: SNSPayloadLogger
+  SNSNylasMessage:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: A Lambda function that handles the delivery of a new Nylas message.
+      Runtime: nodejs14.x
+      Architectures:
+      - x86_64
+      Handler: src/handlers/sns-nylas-message.snsNylasMessageHandler
+      Events:
+        SNSTopicEvent:
+          Type: SNS
+          Properties:
+            Topic: arn:aws:sns:us-east-1:630351220487:nylas-streams
+      MemorySize: 128
+      Timeout: 100
+      Policies:
+      - AWSLambdaBasicExecutionRole
+      CodeUri: SNSNylasMessage

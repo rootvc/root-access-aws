@@ -1,0 +1,13 @@
+{
+    "name": "root-access-aws",
+    "description": "Lambda functions for root-access AWS application",
+    "version": "0.0.1",
+    "private": true,
+    "dependencies": {},
+    "devDependencies": {
+        "jest": "^26.6.3"
+    },
+    "scripts": {
+        "test": "jest"
+    }
+}
