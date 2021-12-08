@@ -44,3 +44,9 @@ Resources:
       - AWSLambdaBasicExecutionRole
       - AmazonSNSReadOnlyAccess
       CodeUri: SNSNylasMessage
+Globals:
+  Function:
+    Environment:
+      Variables:
+        SUPABASE_URL: urlz
+        SUPABASE_TOKEN: token-token

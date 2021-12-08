@@ -3,7 +3,9 @@
     "description": "Lambda functions for root-access AWS application",
     "version": "0.0.1",
     "private": true,
-    "dependencies": {},
+    "dependencies": {
+        "@supabase/supabase-js": "^1.28.5"
+    },
     "devDependencies": {
         "jest": "^26.6.3"
     },

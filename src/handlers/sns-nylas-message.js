@@ -1,4 +1,7 @@
-const handleEmail = (snsMessage) => {
+const {createClient} = require('@supabase/supabase-js');
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_TOKEN);
+
+const handleEmail = async (snsMessage) => {
     let data = {};
     for (let index in Object.keys(snsMessage.data)) {
         const key = Object.keys(snsMessage.data)[index];
@@ -15,7 +18,7 @@ const handleEmail = (snsMessage) => {
         // "folder": data.folder,
         "from": protectNull(data.from, []),
         "grant_id": data.grant_id,
-        "id": data.id,
+        "message_id": data.id,
         // "object": data.object,
         "reply_to": protectNull(data.reply_to),
         // "snippet": data.snippet,
@@ -26,10 +29,33 @@ const handleEmail = (snsMessage) => {
         // "labels": protectNull(data.labels),
         // "sync_category": data.sync_category,
     }
-    console.info('message: ' + JSON.stringify(message));
+    // console.info('message: ' + JSON.stringify(message));
+
+    await createRecord(message);
 }
 
-const protectNull = (obj, emptyValue) => {
+const createRecord = async (record) => {    
+    const { data, error } = await supabase.from('nylas_messages').insert([
+        {
+            "bcc": record.bcc,
+            "cc": record.cc,
+            "date": record.date,
+            "from": record.from,
+            "grant_id": record.grant_id,
+            "message_id": record.message_id,
+            "reply_to": record.reply_to,
+            "to": record.to,
+        }
+    ]);
+
+    if (error) {
+        console.info(error);
+    } else {
+        console.info('message stored in supabase: ' + JSON.stringify(data));
+    }
+}
+
+const protectNull = async (obj, emptyValue) => {
     if (!obj || obj == 'null') {
         return emptyValue;
     } else {
@@ -37,7 +63,7 @@ const protectNull = (obj, emptyValue) => {
     }
 }
 
-const epochToDateTimeZone = (epoch) => {
+const epochToDateTimeZone = async (epoch) => {
     return new Date(epoch * 1000).toISOString()
 }
 
@@ -48,7 +74,7 @@ exports.snsNylasMessageHandler = async (event, context) => {
 
         switch (snsRecord.MessageAttributes.type.Value) {
             case 'com.nylas.messages.create.inflated':
-                handleEmail(snsMessage);
+                await handleEmail(snsMessage);
                 break;
             default:
                 break;
