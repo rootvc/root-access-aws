@@ -11,51 +11,42 @@ const handleEmail = async (snsMessage) => {
 
     // commented out fields are valid, but not used
     const message = {
-        "bcc": protectNull(data.bcc, []),
+        "bcc": cleanEmailAddresses(data.bcc),
         // "body": data.body,
-        "cc": protectNull(data.cc, []),
+        "cc": cleanEmailAddresses(data.cc),
         "date": epochToDateTimeZone(data.date),
         // "folder": data.folder,
-        "from": protectNull(data.from, []),
+        "from": cleanEmailAddresses(data.from),
         "grant_id": data.grant_id,
-        "message_id": data.id,
+        "id": data.id,
         // "object": data.object,
         "reply_to": protectNull(data.reply_to),
         // "snippet": data.snippet,
         // "starred": data.starred,
         // "subject": data.subject,
-        "to": protectNull(data.to, []),
+        "to": cleanEmailAddresses(data.to),
         // "unread": data.unread,
         // "labels": protectNull(data.labels),
         // "sync_category": data.sync_category,
+        "updated_at": (new Date).toISOString(),
     }
     // console.info('message: ' + JSON.stringify(message));
 
     await createRecord(message);
 }
 
-const createRecord = async (record) => {    
-    const { data, error } = await supabase.from('nylas_messages').insert([
-        {
-            "bcc": record.bcc,
-            "cc": record.cc,
-            "date": record.date,
-            "from": record.from,
-            "grant_id": record.grant_id,
-            "message_id": record.message_id,
-            "reply_to": record.reply_to,
-            "to": record.to,
-        }
-    ]);
+const createRecord = async (record) => {   
+    const { data, error } = await supabase.from('nylas_messages')
+        .upsert(record, { onConflict: 'id' });
 
     if (error) {
-        console.info(error);
+        console.error(error);
     } else {
-        console.info('message stored in supabase: ' + JSON.stringify(data));
+        console.info(`Nylas message ${record.id} stored in supabase: ${JSON.stringify(data)}`);
     }
 }
 
-const protectNull = async (obj, emptyValue) => {
+const protectNull = (obj, emptyValue) => {
     if (!obj || obj == 'null') {
         return emptyValue;
     } else {
@@ -63,7 +54,15 @@ const protectNull = async (obj, emptyValue) => {
     }
 }
 
-const epochToDateTimeZone = async (epoch) => {
+const cleanEmailAddresses = (obj) => {
+    if (protectNull(obj)) {
+        return obj.Email || obj[0].Email;
+    } else {
+        return ''
+    }
+}
+
+const epochToDateTimeZone = (epoch) => {
     return new Date(epoch * 1000).toISOString()
 }
 

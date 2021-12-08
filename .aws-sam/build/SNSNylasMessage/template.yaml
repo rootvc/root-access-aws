@@ -62,10 +62,9 @@ Resources:
         - AWSLambdaBasicExecutionRole
         - AmazonSNSReadOnlyAccess
 
-
 Globals:
   Function:
     Environment:
       Variables:
-        SUPABASE_URL: urlz
-        SUPABASE_TOKEN: token-token
+        SUPABASE_URL: foo
+        SUPABASE_TOKEN: bar
