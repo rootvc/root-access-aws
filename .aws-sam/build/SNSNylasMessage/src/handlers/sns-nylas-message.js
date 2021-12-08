@@ -8,12 +8,12 @@ const handleEmail = (snsMessage) => {
 
     // commented out fields are valid, but not used
     const message = {
-        "bcc": protectNull(data.bcc),
+        "bcc": protectNull(data.bcc, []),
         // "body": data.body,
-        "cc": protectNull(data.cc),
-        "date": data.date, // TODO: format
+        "cc": protectNull(data.cc, []),
+        "date": epochToDateTimeZone(data.date),
         // "folder": data.folder,
-        "from": protectNull(data.from),
+        "from": protectNull(data.from, []),
         "grant_id": data.grant_id,
         "id": data.id,
         // "object": data.object,
@@ -21,7 +21,7 @@ const handleEmail = (snsMessage) => {
         // "snippet": data.snippet,
         // "starred": data.starred,
         // "subject": data.subject,
-        "to": protectNull(data.to),
+        "to": protectNull(data.to, []),
         // "unread": data.unread,
         // "labels": protectNull(data.labels),
         // "sync_category": data.sync_category,
@@ -29,12 +29,16 @@ const handleEmail = (snsMessage) => {
     console.info('message: ' + JSON.stringify(message));
 }
 
-const protectNull = (list) => {
-    if (list == 'null') {
-        return null; // or: []?
+const protectNull = (obj, emptyValue) => {
+    if (!obj || obj == 'null') {
+        return emptyValue;
     } else {
-        return JSON.stringify(list); // array object
+        return obj;
     }
+}
+
+const epochToDateTimeZone = (epoch) => {
+    return new Date(epoch * 1000).toISOString()
 }
 
 exports.snsNylasMessageHandler = async (event, context) => {
