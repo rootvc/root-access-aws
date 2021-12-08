@@ -1,4 +1,4 @@
-handleEmail = (snsMessage) => {
+const handleEmail = (snsMessage) => {
     let data = {};
     for (let index in Object.keys(snsMessage.data)) {
         const key = Object.keys(snsMessage.data)[index];
@@ -23,17 +23,25 @@ handleEmail = (snsMessage) => {
         // "subject": data.subject,
         "to": protectNull(data.to),
         // "unread": data.unread,
-        "labels": protectNull(data.labels),
+        // "labels": protectNull(data.labels),
         // "sync_category": data.sync_category,
     }
     console.info('message: ' + JSON.stringify(message));
+    console.info(message.bcc);
+    console.info(message.cc);
+    console.info(message.date);
+    console.info(message.from);
+    console.info(message.grant_id);
+    console.info(message.id);
+    console.info(message.reply_to);
+    console.info(message.to);
 }
 
-protectNull = (list) => {
-    if (list = 'null') {
+const protectNull = (list) => {
+    if (list == 'null') {
         return null;
     } else {
-        JSON.encode(list);
+        return list;
     }
 }
 
