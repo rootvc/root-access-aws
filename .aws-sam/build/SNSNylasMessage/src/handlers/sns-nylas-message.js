@@ -32,12 +32,39 @@ const handleEmail = async (snsMessage) => {
     }
     // console.info('message: ' + JSON.stringify(message));
 
-    await createRecord(message);
+    // await createMessageRecord(message);
+    await createParticipantRecords(message);
 }
 
-const createRecord = async (record) => {   
-    const { data, error } = await supabase.from('nylas_messages')
+const createMessageRecord = async (record) => {   
+    const { data, error } = await supabase.from('test_nylas_messages_test')
         .upsert(record, { onConflict: 'id' });
+
+    if (error) {
+        console.error(error);
+    } else {
+        console.info(`Nylas message ${record.id} stored in supabase: ${JSON.stringify(data)}`);
+    }
+}
+
+const createParticipantRecords = async (record) => {   
+    const { data, error } = await supabase.from('test_nylas_participants')
+        .upsert([
+            {
+                "message_id": record.id,
+                "type": 'to',
+                "grant_id": record.grant_id,
+                "email": record.to,
+                "updated_at": (new Date).toISOString(),
+            }, {
+                "message_id": record.id,
+                "type": 'from',
+                "grant_id": record.grant_id,
+                "email": record.from,
+                "updated_at": (new Date).toISOString(),
+            }
+        ], { onConflict: 'message_id,type' }
+        );
 
     if (error) {
         console.error(error);
