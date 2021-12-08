@@ -1,5 +1,6 @@
 const {createClient} = require('@supabase/supabase-js');
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_TOKEN);
+const env = process.env.ENVIRONMENT_PREFIX || '';
 
 const handleEmail = async (snsMessage) => {
     let data = {};
@@ -32,12 +33,11 @@ const handleEmail = async (snsMessage) => {
     }
     // console.info('message: ' + JSON.stringify(message));
 
-    // await createMessageRecord(message);
-    await createParticipantRecords(message);
+    await Promise.all([createMessageRecord(message), createParticipantRecords(message)]);
 }
 
 const createMessageRecord = async (record) => {   
-    const { data, error } = await supabase.from('test_nylas_messages_test')
+    const { data, error } = await supabase.from(`${env}nylas_messages`)
         .upsert(record, { onConflict: 'id' });
 
     if (error) {
@@ -48,7 +48,7 @@ const createMessageRecord = async (record) => {
 }
 
 const createParticipantRecords = async (record) => {   
-    const { data, error } = await supabase.from('test_nylas_participants')
+    const { data, error } = await supabase.from(`${env}nylas_participants`)
         .upsert([
             {
                 "message_id": record.id,
