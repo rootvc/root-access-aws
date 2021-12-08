@@ -27,33 +27,27 @@ const handleEmail = (snsMessage) => {
         // "sync_category": data.sync_category,
     }
     console.info('message: ' + JSON.stringify(message));
-    console.info(message.bcc);
-    console.info(message.cc);
-    console.info(message.date);
-    console.info(message.from);
-    console.info(message.grant_id);
-    console.info(message.id);
-    console.info(message.reply_to);
-    console.info(message.to);
 }
 
 const protectNull = (list) => {
     if (list == 'null') {
-        return null;
+        return null; // or: []?
     } else {
-        return list;
+        return JSON.stringify(list); // array object
     }
 }
 
 exports.snsNylasMessageHandler = async (event, context) => {
-    // const snsMessage = JSON.parse(event.Records[0].Sns.Message);
-    const snsMessage = JSON.parse(event.Message);
+    for (record of event.Records) {
+        const snsRecord = record.Sns;
+        const snsMessage = JSON.parse(snsRecord.Message);
 
-    switch (event.MessageAttributes.type.Value) {
-        case 'com.nylas.messages.create.inflated':
-            handleEmail(snsMessage);
-            break;
-        default:
-            break;
+        switch (snsRecord.MessageAttributes.type.Value) {
+            case 'com.nylas.messages.create.inflated':
+                handleEmail(snsMessage);
+                break;
+            default:
+                break;
+        }
     }
 }
