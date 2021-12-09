@@ -30,5 +30,3 @@ Globals:
     Environment:
       Variables:
         ENVIRONMENT_PREFIX: ''
-        SUPABASE_URL: foo
-        SUPABASE_TOKEN: bar

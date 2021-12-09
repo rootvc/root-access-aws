@@ -1,6 +1,22 @@
+var AWS = require('aws-sdk'),
+    region = 'us-east-1',
+    secretName = 'root_access/supabase_credentials'
+;
 const {createClient} = require('@supabase/supabase-js');
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_TOKEN);
-const env = process.env.ENVIRONMENT_PREFIX;
+const aws = new AWS.SecretsManager({region: region});
+let supabase = {};
+const env = process.env.ENVIRONMENT_PREFIX || '';
+
+function getAwsSecret(secretName) {
+  return aws.getSecretValue({ SecretId: secretName }, (err, data) => {
+    if (err) { throw err; }
+    return data;
+  }).promise();
+}
+
+async function getAwsSecretAsync (secretName) {
+    return await getAwsSecret(secretName);
+}
 
 const handleEmail = async (snsMessage) => {
     let data = {};
@@ -94,6 +110,10 @@ const epochToDateTimeZone = (epoch) => {
 }
 
 exports.snsNylasMessageHandler = async (event, context) => {
+    const awsSecret = await getAwsSecretAsync(secretName);
+    const secret = JSON.parse(awsSecret.SecretString);
+    supabase = createClient(secret.SUPABASE_URL, secret.SUPABASE_TOKEN);
+
     for (record of event.Records) {
         const snsRecord = record.Sns;
         const snsMessage = JSON.parse(snsRecord.Message);
