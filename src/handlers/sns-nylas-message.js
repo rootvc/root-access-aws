@@ -103,11 +103,11 @@ const protectNull = (obj, emptyValue) => {
 }
 
 const getEmailField = (obj) => {
-    let value = '';
+    let value;
     if (protectNull(obj)) {
-        value = obj.Email || obj[0].Email;
+        value = (obj.Email || obj[0].Email).toLowerCase();
     }
-    return value.toLowerCase();
+    return value;
 }
 
 const epochToDateTimeZone = (epoch) => {
