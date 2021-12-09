@@ -13,10 +13,7 @@ function getAwsSecret(secretName) {
     return data;
   }).promise();
 }
-
-async function getAwsSecretAsync (secretName) {
-    return await getAwsSecret(secretName);
-}
+async function getAwsSecretAsync (secretName) { return await getAwsSecret(secretName); }
 
 const handleEmail = async (snsMessage) => {
     let data = {};
