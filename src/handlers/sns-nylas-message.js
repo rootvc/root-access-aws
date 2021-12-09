@@ -46,14 +46,12 @@ const handleEmail = async (snsMessage) => {
         "bcc_array": arrayFromEmailField(data.bcc),
         "cc_array": arrayFromEmailField(data.cc),
         "to_array": arrayFromEmailField(data.to),
+        "from_array": arrayFromEmailField(data.from),
         "reply_to_array": arrayFromEmailField(data.reply_to),
 
         "updated_at": (new Date).toISOString(),
     }
     // console.info('message: ' + JSON.stringify(message));
-    console.info(message.to_array);
-    // REGEXP_SUBSTR(email,'[a-zA-Z0-9\._\-]+@([a-zA-Z0-9_\-]+\.)+[a-zA-Z]+', 1, 1, 'e', 0) as A,
-
     await Promise.all([createMessageRecord(message), createParticipantRecords(message)]);
 }
 
@@ -76,12 +74,14 @@ const createParticipantRecords = async (record) => {
                 "type": 'to',
                 "grant_id": record.grant_id,
                 "email": record.to,
+                "email_array": record.to_array.concat(record.bcc_array, record.cc_array, record.reply_to_array),
                 "updated_at": (new Date).toISOString(),
             }, {
                 "message_id": record.id,
                 "type": 'from',
                 "grant_id": record.grant_id,
                 "email": record.from,
+                "email_array": record.from_array,
                 "updated_at": (new Date).toISOString(),
             }
         ], { onConflict: 'message_id,type' }
