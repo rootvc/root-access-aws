@@ -24,6 +24,7 @@ Resources:
       Policies:
         - AWSLambdaBasicExecutionRole
         - AmazonSNSReadOnlyAccess
+        - SecretsManagerReadWrite
 
 Globals:
   Function:

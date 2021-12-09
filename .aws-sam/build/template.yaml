@@ -1,18 +1,15 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: >-
-  root-access-aws
-
+Description: root-access-aws
 Transform:
 - AWS::Serverless-2016-10-31
-
-Resources:  
+Resources:
   SNSNylasMessage:
     Type: AWS::Serverless::Function
     Properties:
       Description: A Lambda function that handles the delivery of a new Nylas message.
       Runtime: nodejs14.x
       Architectures:
-        - x86_64
+      - x86_64
       Handler: src/handlers/sns-nylas-message.snsNylasMessageHandler
       Events:
         SNSTopicEvent:
@@ -22,10 +19,10 @@ Resources:
       MemorySize: 128
       Timeout: 100
       Policies:
-        - AWSLambdaBasicExecutionRole
-        - AmazonSNSReadOnlyAccess
-        - SecretsManagerReadWrite
-
+      - AWSLambdaBasicExecutionRole
+      - AmazonSNSReadOnlyAccess
+      - SecretsManagerReadWrite
+      CodeUri: SNSNylasMessage
 Globals:
   Function:
     Environment:
