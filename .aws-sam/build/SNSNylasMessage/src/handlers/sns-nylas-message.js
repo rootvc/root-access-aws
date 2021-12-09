@@ -25,12 +25,12 @@ const handleEmail = async (snsMessage) => {
 
     // commented out fields are valid, but not used
     const message = {
-        "bcc": cleanEmailAddresses(data.bcc),
+        "bcc": getEmailField(data.bcc),
         // "body": data.body,
-        "cc": cleanEmailAddresses(data.cc),
+        "cc": getEmailField(data.cc),
         "date": epochToDateTimeZone(data.date),
         // "folder": data.folder,
-        "from": cleanEmailAddresses(data.from),
+        "from": getEmailField(data.from),
         "grant_id": data.grant_id,
         "id": data.id,
         // "object": data.object,
@@ -38,13 +38,21 @@ const handleEmail = async (snsMessage) => {
         // "snippet": data.snippet,
         // "starred": data.starred,
         // "subject": data.subject,
-        "to": cleanEmailAddresses(data.to),
+        "to": getEmailField(data.to),
         // "unread": data.unread,
         // "labels": protectNull(data.labels),
         // "sync_category": data.sync_category,
+
+        "bcc_array": arrayFromEmailField(data.bcc),
+        "cc_array": arrayFromEmailField(data.cc),
+        "to_array": arrayFromEmailField(data.to),
+        "reply_to_array": arrayFromEmailField(data.reply_to),
+
         "updated_at": (new Date).toISOString(),
     }
     // console.info('message: ' + JSON.stringify(message));
+    console.info(message.to_array);
+    // REGEXP_SUBSTR(email,'[a-zA-Z0-9\._\-]+@([a-zA-Z0-9_\-]+\.)+[a-zA-Z]+', 1, 1, 'e', 0) as A,
 
     await Promise.all([createMessageRecord(message), createParticipantRecords(message)]);
 }
@@ -94,16 +102,22 @@ const protectNull = (obj, emptyValue) => {
     }
 }
 
-const cleanEmailAddresses = (obj) => {
+const getEmailField = (obj) => {
+    let value = '';
     if (protectNull(obj)) {
-        return obj.Email || obj[0].Email;
-    } else {
-        return ''
+        value = obj.Email || obj[0].Email;
     }
+    return value.toLowerCase();
 }
 
 const epochToDateTimeZone = (epoch) => {
     return new Date(epoch * 1000).toISOString()
+}
+
+const arrayFromEmailField = (field) => {
+    const cleanField = getEmailField(field);
+    const regex = /([a-z0-9._+-]+@[a-z0-9_-]+[a-z]\.[a-z]+)+/g;
+    return [... new Set(cleanField.match(regex))]; // unique
 }
 
 exports.snsNylasMessageHandler = async (event, context) => {
