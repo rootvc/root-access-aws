@@ -20,6 +20,7 @@ Resources:
       Timeout: 100
       Policies:
       - AWSLambdaBasicExecutionRole
+      - RootAccessLambdaExecutionRole
       - AmazonSNSReadOnlyAccess
       CodeUri: SNSNylasMessage
 Globals:

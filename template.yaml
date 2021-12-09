@@ -23,6 +23,7 @@ Resources:
       Timeout: 100
       Policies:
         - AWSLambdaBasicExecutionRole
+        - RootAccessLambdaExecutionRole
         - AmazonSNSReadOnlyAccess
 
 Globals:
