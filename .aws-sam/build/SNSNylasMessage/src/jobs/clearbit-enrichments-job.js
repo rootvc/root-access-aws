@@ -29,7 +29,6 @@ const getContactsRecords = async () => {
     if (error) {
         console.error(error);
     } else {
-        console.info(`got contacts`);
         return data;
     }
 }
@@ -41,7 +40,6 @@ const getClearbitEnrichmentsRecords = async () => {
     if (error) {
         console.error(error);
     } else {
-        console.info(`got clearbit_enrichments`);
         return data;
     }
 }
@@ -89,6 +87,7 @@ const upsertClearbitEnrichmentRecords = async (emails, values) => {
     if (error) {
         console.error(error);
     } else {
+        console.info(`upserted clearbit_enrichments: ${emails}`);
         return data;
     }
 }
