@@ -1,4 +1,4 @@
-const CLEARBIT_LIMIT = 49; // maximimum number of Clearbit enrichments to process at once
+const CLEARBIT_LIMIT = 5; // maximimum number of Clearbit enrichments to process at once
 
 var AWS = require('aws-sdk'),
     region = 'us-east-1',
@@ -83,7 +83,6 @@ const upsertClearbitEnrichmentRecords = async (emails, values) => {
 
     const { data, error } = await supabase.from(`${process.env.TABLE_PREFIX}clearbit_enrichments`)
         .upsert(upsertData, { onConflict: 'email' });
-
     if (error) {
         console.error(error);
     } else {
