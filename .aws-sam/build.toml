@@ -7,6 +7,6 @@ runtime = "nodejs14.x"
 architecture = "x86_64"
 manifest_hash = ""
 packagetype = "Zip"
-functions = ["SNSNylasMessage"]
+functions = ["SNSNylasMessage", "ClearbitEnrichmentsJob"]
 
 [layer_build_definitions]

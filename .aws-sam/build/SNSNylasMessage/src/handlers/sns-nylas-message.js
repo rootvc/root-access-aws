@@ -5,7 +5,6 @@ var AWS = require('aws-sdk'),
 const {createClient} = require('@supabase/supabase-js');
 const aws = new AWS.SecretsManager({region: region});
 let supabase = {};
-const env = process.env.ENVIRONMENT_PREFIX || '';
 
 function getAwsSecret(secretName) {
   return aws.getSecretValue({ SecretId: secretName }, (err, data) => {
@@ -56,18 +55,18 @@ const handleEmail = async (snsMessage) => {
 }
 
 const createMessageRecord = async (record) => {   
-    const { data, error } = await supabase.from(`${env}nylas_messages`)
+    const { data, error } = await supabase.from(`${process.env.TABLE_PREFIX}nylas_messages`)
         .upsert(record, { onConflict: 'id' });
 
     if (error) {
         console.error(error);
     } else {
-        console.info(`Nylas message ${record.id} stored in supabase: ${JSON.stringify(data)}`);
+        console.info(`Nylas message ${record.id} stored in database`);
     }
 }
 
 const createParticipantRecords = async (record) => {   
-    const { data, error } = await supabase.from(`${env}nylas_participants`)
+    const { data, error } = await supabase.from(`${process.env.TABLE_PREFIX}nylas_participants`)
         .upsert([
             {
                 "message_id": record.id,
@@ -90,7 +89,7 @@ const createParticipantRecords = async (record) => {
     if (error) {
         console.error(error);
     } else {
-        console.info(`Nylas message ${record.id} stored in supabase: ${JSON.stringify(data)}`);
+        console.info(`Nylas participant ${record.id} stored in database`);
     }
 }
 
@@ -115,7 +114,7 @@ const epochToDateTimeZone = (epoch) => {
 }
 
 const arrayFromEmailField = (field) => {
-    const cleanField = getEmailField(field);
+    const cleanField = getEmailField(field) || '';
     const regex = /([a-z0-9._+-]+@[a-z0-9_-]+[a-z]\.[a-z]+)+/g;
     return [... new Set(cleanField.match(regex))]; // unique
 }

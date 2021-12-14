@@ -23,8 +23,27 @@ Resources:
       - AmazonSNSReadOnlyAccess
       - SecretsManagerReadWrite
       CodeUri: SNSNylasMessage
+  ClearbitEnrichmentsJob:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: A Lambda function that queries Clearbit Enrichments API.
+      Runtime: nodejs14.x
+      Architectures:
+      - x86_64
+      Handler: src/jobs/clearbit-enrichments-job.clearbitEnrichmentsJob
+      Events:
+        SNSTopicEvent:
+          Type: SNS
+          Properties:
+            Topic: arn:aws:sns:us-east-1:630351220487:nylas-streams
+      MemorySize: 128
+      Timeout: 100
+      Policies:
+      - AWSLambdaBasicExecutionRole
+      - SecretsManagerReadWrite
+      CodeUri: ClearbitEnrichmentsJob
 Globals:
   Function:
     Environment:
       Variables:
-        ENVIRONMENT_PREFIX: ''
+        TABLE_PREFIX: ''
