@@ -1,4 +1,4 @@
-const CLEARBIT_LIMIT = 25; // maximimum number of Clearbit enrichments to process at once
+const CLEARBIT_LIMIT = 49; // maximimum number of Clearbit enrichments to process at once
 
 var AWS = require('aws-sdk'),
     region = 'us-east-1',
