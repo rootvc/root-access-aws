@@ -1,4 +1,4 @@
-const CLEARBIT_LIMIT = 5; // maximimum number of Clearbit enrichments to process at once
+const CLEARBIT_LIMIT = 10; // maximimum number of Clearbit enrichments to process at once
 
 var AWS = require('aws-sdk'),
     region = 'us-east-1',
@@ -16,7 +16,7 @@ const aws = new AWS.SecretsManager({region: region});
 function getAwsSecret(secretName) {
   return aws.getSecretValue({ SecretId: secretName }, (err, data) => {
     if (err) {
-        console.error(err);
+        console.error(err); throw(err);
     }
     return data;
   }).promise();
@@ -46,12 +46,19 @@ const getClearbitEnrichmentsRecords = async () => {
 
 const upsertClearbitEnrichmentRecords = async (emails, values) => {
     const upsertData = values.map((entry, i) => {
-        email = emails[i];
-        record = entry;
+        const email = emails[i];
+        const record = entry;
+        const recordIsEmpty = Object.keys(record).length == 0;
 
-         let obj = new Object({
+        if (recordIsEmpty) {
+            console.info(`No enrichment data found for ${email}`);
+        } else {
+            console.info(`Enrichment data found for ${email}`);
+        }
+        
+        let obj = new Object({
             "email": email,
-            "raw_response": record,
+            "raw_response": recordIsEmpty ? null : record,
             "person_id": null,
             "person_name_family_name": null,
             "person_name_given_name": null,
@@ -60,25 +67,26 @@ const upsertClearbitEnrichmentRecords = async (emails, values) => {
             "company_domain": null,
             "company_name": null,
             "company_indexed_at": null,
-            "created_at": (new Date).toISOString(),
+            "created_at": (new Date).toISOString(), // TODO: make null
             "updated_at": (new Date).toISOString()
         });
 
-        if (record.person) {
+        if (record.person != null) {
             obj.person_id = record.person.id;
             obj.person_name_family_name = record.person.name.familyName;
             obj.person_name_given_name = record.person.name.givenName;
             obj.person_indexed_at = record.person.indexedAt;
         };
 
-        if (record.company) {
+        if (record.company != null) {
             obj.company_id = record.company.id;
             obj.company_domain = record.company.domain;
             obj.company_name = record.company.name;
             obj.company_indexed_at = record.company.indexedAt;
         };
-
+        
         return obj;
+    
     });
 
     const { data, error } = await supabase.from(`${process.env.TABLE_PREFIX}clearbit_enrichments`)
@@ -86,13 +94,13 @@ const upsertClearbitEnrichmentRecords = async (emails, values) => {
     if (error) {
         console.error(error);
     } else {
-        console.info(`upserted clearbit_enrichments: ${emails}`);
+        console.info(`${data.length} records upserted`);
         return data;
     }
 }
 
 exports.clearbitEnrichmentsJob = () => {
-    Promise.all([getAwsSecret(clearbitSecretName), getAwsSecret(supabaseSecretName)])
+    const response = Promise.all([getAwsSecret(clearbitSecretName), getAwsSecret(supabaseSecretName)])
     .then(responses => {
         const clearbitSecret = JSON.parse(responses[0].SecretString);
         const supabaseSecret = JSON.parse(responses[1].SecretString);
@@ -103,15 +111,26 @@ exports.clearbitEnrichmentsJob = () => {
         return Promise.all([getContactsRecords(), getClearbitEnrichmentsRecords()]);
     }).then(promises => {
         const [contacts, clearbitEnrichments] = promises;
-
-        const emailsToEnrich = contacts.filter(contact =>
+        const emailsToEnrich = contacts
+        .map(o => o.email)
+        .map(email => email.toLowerCase().replace(/\+[^)]*@/, '@'))
+        .filter(email =>
             !clearbitEnrichments.find(clearbitEnrichment =>
-                clearbitEnrichment.email === contact.email)
-        ).map(o => o.email).slice(0, CLEARBIT_LIMIT);
-
+                clearbitEnrichment.email === email)
+        )
+        .slice(0, CLEARBIT_LIMIT);
         return emailsToEnrich;
     }).then(emails => {
-        const promises = emails.map(email => clearbit.Enrichment.find({ email: email, stream: true }));
+        const promises = emails.map(email => {
+            return clearbit.Enrichment.find({ email: email, stream: true })
+            .then(record => {
+                return record;
+              })
+              .catch(function (err) {
+                console.error(err);
+                return {};
+              });
+        });
         return Promise.all([emails, Promise.all(promises)]);
     })
     .then(function (records) {
@@ -120,5 +139,8 @@ exports.clearbitEnrichmentsJob = () => {
     })
     .catch(function(err) {
         console.error(err);
-    });    
+        throw err;
+    });
+
+    return response;
 }
