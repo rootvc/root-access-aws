@@ -51,7 +51,7 @@ const upsertClearbitEnrichmentRecords = async (emails, values) => {
 
          let obj = new Object({
             "email": email,
-            "raw_response": JSON.stringify(record),
+            "raw_response": record,
             "person_id": null,
             "person_name_family_name": null,
             "person_name_given_name": null,
