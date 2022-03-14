@@ -18,7 +18,6 @@ const handleEmail = async (snsMessage) => {
     let data = {};
     for (let index in Object.keys(snsMessage.data)) {
         const key = Object.keys(snsMessage.data)[index];
-        // console.info('(' + index + ') ' + key + ': ' +snsMessage.data[key]);
         data[key] = snsMessage.data[key];
     }
 
